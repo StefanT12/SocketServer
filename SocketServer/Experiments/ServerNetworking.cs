@@ -10,35 +10,19 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SocketServer.Experiments
 {
 
 
-    public struct ClientMeta
+    public class ClientMeta
     {
         public IPEndPoint UdpEndpoint { get; set; }
         public Socket ConnectedSocket { get; set; }
         public CryptographicData CryptographicData { get; set; }
-    }
-
-    public static class ClientMetaUtilities
-    {
-        public static ClientMeta ReturnCopy(this ClientMeta cm)
-        {
-            return cm;
-        }
-        public static ClientMeta ChangeSocket(this ClientMeta cm, Socket newSocket)
-        {
-            cm.ConnectedSocket = newSocket;
-            return cm;
-        }
-        public static ClientMeta RegenerateCryptographicData(this ClientMeta cm, string newKey)
-        {
-            cm.CryptographicData = CryptographyUtility.GenerateData(newKey);
-            return cm;
-        }
+        public SemaphoreSlim TcpLock = new SemaphoreSlim(0, 1);
     }
 
     public delegate Task HandleReceivedData(byte[] data);
@@ -53,13 +37,13 @@ namespace SocketServer.Experiments
         }
         ServerNetworkingData InitServer(int maxConnections);
         void WhitelistClient(int tcpPort, int udpPort, string ipAddress, string cryptoSymmetricKey);
-        Task SendTcp<T>(T content, string ipPort) where T : struct;
-        Task SendUdp<T>(T content, string ipPort) where T : struct;
+        Task<bool> SendTcp<T>(T content, string ipPort) where T : struct;
+        Task<bool> SendUdp<T>(T content, string ipPort) where T : struct;
     }
 
     public class ServerNetworking: INetworkServer
     {
-        private static ConcurrentDictionary<string, ClientMeta> _clients = new ConcurrentDictionary<string, ClientMeta>();
+        private static Dictionary<string, ClientMeta> _clients = new Dictionary<string, ClientMeta>();
 
         private const int _bufSize = 32 * 2;
         
@@ -93,18 +77,43 @@ namespace SocketServer.Experiments
             };
         }
 
-        public async Task SendTcp<T>(T content, string ipPort) where T : struct
+        public async Task<bool> SendTcp<T>(T content, string ipPort) where T : struct
         {
-            ClientMeta client; _clients.TryGetValue(ipPort, out client);
-
-            await client.ConnectedSocket.SendAsync(_ReadyContentForClient(content, client), SocketFlags.None);
+            ClientMeta client;
+            if (_clients.TryGetValue(ipPort, out client))
+            {
+                await client.TcpLock.WaitAsync();
+                try
+                {
+                    await client.ConnectedSocket.SendAsync(_ReadyContentForClient(content, client), SocketFlags.None);
+                    return  true;
+                }
+                catch
+                {
+                    return false;
+                }
+                finally
+                {
+                    client.TcpLock.Release();
+                }
+            }
+            return false;
         }
 
-        public async Task SendUdp<T>(T content, string ipPort) where T : struct
+        public async Task<bool> SendUdp<T>(T content, string ipPort) where T : struct
         {
-            ClientMeta client; _clients.TryGetValue(ipPort, out client);
+            try
+            {
+                ClientMeta client; _clients.TryGetValue(ipPort, out client);
 
-            await UdpSocket.SendToAsync(_ReadyContentForClient(content, client), SocketFlags.None, client.UdpEndpoint);
+                await UdpSocket.SendToAsync(_ReadyContentForClient(content, client), SocketFlags.None, client.UdpEndpoint);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void WhitelistClient(int tcpPort, int udpPort, string ipAddress, string cryptoSymmetricKey)
@@ -134,9 +143,9 @@ namespace SocketServer.Experiments
             {
                 return;//unauthorized asshole
             }
-           
-            var client = _clients[ipPort].ReturnCopy().ChangeSocket(tcpClient);
-            _clients.TryUpdate(ipPort, client, _clients[ipPort]);
+            _clients[ipPort].ConnectedSocket = tcpClient;
+
+            var client = _clients[ipPort];
 
             byte[] buff = new byte[_bufSize];
             int readBytes = 0;
@@ -160,8 +169,6 @@ namespace SocketServer.Experiments
                     _crypto.SetCryptingData(client.CryptographicData);
                     
                     _ = Task.Run(() => _handleReceivedData(_crypto.Decrypt(buff)));
-
-                    //UpdateLastSeen(tcpClient);
                 }
                 catch
                 {
@@ -169,7 +176,7 @@ namespace SocketServer.Experiments
                 }
             }
 
-            _clients.TryRemove(ipPort, out _);
+            _clients.Remove(ipPort, out _);
 
         }
         #endregion

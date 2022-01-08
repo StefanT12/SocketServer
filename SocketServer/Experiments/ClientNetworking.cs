@@ -82,7 +82,6 @@ namespace SocketServer.Experiments
                 {
                     Socket = client
                 };
-
                 client.BeginReceive(state.buffer, 0, BufSize, 0, ReceiveCallback, state);
             }
             catch (Exception e)
