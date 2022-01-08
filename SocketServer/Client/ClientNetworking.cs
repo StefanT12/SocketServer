@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SocketServer.Experiments
@@ -18,17 +19,13 @@ namespace SocketServer.Experiments
     }
     public class ClientNetworking : IDisposable
     {
+        private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(0,1);
         private const int BufSize = 32 * 2;
         private readonly OnReceiveDataDelegate _onReceiveCallback;
         private readonly ICrypto _crypto;
-        public class StateObject
-        {
-            public Socket Socket { get; set; }
-            public byte[] buffer = new byte[BufSize];
-        }
         protected readonly StateObject StateObj = new StateObject();
-
         private readonly Socket UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp), TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        
         public ClientNetworking(OnReceiveDataDelegate onReceiveCallback, ICrypto crypto)
         {
             _onReceiveCallback = onReceiveCallback;
@@ -84,6 +81,7 @@ namespace SocketServer.Experiments
                 Console.WriteLine(e.ToString());
             }
         }
+
         private void ReceiveCallback(IAsyncResult ar)
         {
             try
@@ -104,6 +102,7 @@ namespace SocketServer.Experiments
                 Console.WriteLine(e.ToString());
             }
         }
+
         public async Task<bool> SendData<T>(T content) where T : struct
         {
             var data = _crypto.Encrypt(StructUtility.StructToBytes(
@@ -111,24 +110,32 @@ namespace SocketServer.Experiments
                     content: StructUtility.StructToBytes(content),
                     contentType: content.GetContentType())
                 ));
-            
             try
             {
+                await _sendSemaphore.WaitAsync();
                 await TcpSocket.SendAsync(data, SocketFlags.None);
-
                 return true;
             }
             catch
             {
                 return false;
             }
-          
+            finally
+            {
+                _sendSemaphore.Release();
+            }
         }
-      
+
         public void Dispose()
         {
             TcpSocket.Close();
             UdpSocket.Close();
+        }
+
+        public class StateObject
+        {
+            public Socket Socket { get; set; }
+            public byte[] buffer = new byte[BufSize];
         }
     }
 }

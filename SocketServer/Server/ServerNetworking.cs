@@ -11,14 +11,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using static SocketServer.Server.Interfaces.INetworkServer;
 
-namespace SocketServer.Experiments
+namespace SocketServer.Server
 {
-    public class ServerNetworking: INetworkServer
+    public class ServerNetworking : INetworkServer
     {
         private static Dictionary<string, ClientMeta> _clients = new Dictionary<string, ClientMeta>();
 
         private const int _bufSize = 32 * 2;
-        
+
         private readonly HandleReceivedData _handleReceivedData;
         private readonly ICrypto _crypto = new Cryptography.Cryptography();
         private readonly Socket UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp), TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -32,7 +32,7 @@ namespace SocketServer.Experiments
 
         public ServerNetworkingData InitServer(int maxConnections)
         {
-            var address  = Dns.GetHostEntry(Dns.GetHostName())
+            var address = Dns.GetHostEntry(Dns.GetHostName())
                         .AddressList
                         .First(x => x.AddressFamily == AddressFamily.InterNetwork);
 
@@ -41,7 +41,7 @@ namespace SocketServer.Experiments
             TcpSocket.Listen(maxConnections);
             _acceptConnections = Task.Run(() => AcceptConnections());
 
-            return new INetworkServer.ServerNetworkingData
+            return new ServerNetworkingData
             {
                 HostName = address.ToString(),
                 TcpOpenedPort = ((IPEndPoint)TcpSocket.LocalEndPoint).Port,
@@ -58,7 +58,7 @@ namespace SocketServer.Experiments
                 try
                 {
                     await client.ConnectedSocket.SendAsync(_ReadyContentForClient(content, client), SocketFlags.None);
-                    return  true;
+                    return true;
                 }
                 catch
                 {
@@ -90,7 +90,7 @@ namespace SocketServer.Experiments
 
         public void WhitelistClient(int tcpPort, int udpPort, string ipAddress, string cryptoSymmetricKey)
         {
-            _clients.TryAdd($"{ipAddress}:{tcpPort}", new ClientMeta 
+            _clients.TryAdd($"{ipAddress}:{tcpPort}", new ClientMeta
             {
                 UdpEndpoint = new IPEndPoint(IPAddress.Parse(ipAddress), udpPort),
                 CryptographicData = CryptographyUtility.GenerateData(cryptoSymmetricKey)
@@ -110,7 +110,7 @@ namespace SocketServer.Experiments
         private async Task DataReceiver(Socket tcpClient)
         {
             var ipPort = tcpClient.RemoteEndPoint.ToString();
-            
+
             if (!_clients.ContainsKey(ipPort))
             {
                 return;//unauthorized asshole
@@ -130,16 +130,16 @@ namespace SocketServer.Experiments
                     {
                         break;
                     }
-                    
+
                     readBytes = await client.ConnectedSocket.ReceiveAsync(buff, SocketFlags.None);
-                    
+
                     if (readBytes == 0)
                     {
                         continue;
                     }
 
                     _crypto.SetCryptingData(client.CryptographicData);
-                    
+
                     _ = Task.Run(() => _handleReceivedData(_crypto.Decrypt(buff)));
                 }
                 catch
@@ -157,7 +157,7 @@ namespace SocketServer.Experiments
         {
             if (client.Connected)
             {
-                if ((client.Poll(0, SelectMode.SelectWrite)) && (!client.Poll(0, SelectMode.SelectError)))
+                if (client.Poll(0, SelectMode.SelectWrite) && !client.Poll(0, SelectMode.SelectError))
                 {
                     byte[] buffer = new byte[1];
                     if (client.Receive(buffer, SocketFlags.Peek) == 0)
