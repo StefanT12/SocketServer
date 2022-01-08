@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SocketServer.UDP.Entity.ContentTypes
+namespace Entity.ContentTypes
 {
     public enum ContentType
     {

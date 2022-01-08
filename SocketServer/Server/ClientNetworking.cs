@@ -1,15 +1,10 @@
-﻿using SocketServer.UDP;
-using SocketServer.UDP.Client;
-using SocketServer.UDP.Entity;
+﻿using Entity;
 using SocketServer.UDP.Interfaces;
 using SocketServer.Utility;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SocketServer.Experiments
@@ -109,27 +104,27 @@ namespace SocketServer.Experiments
                 Console.WriteLine(e.ToString());
             }
         }
-        public void SendData<T>(T content) where T : struct
+        public async Task<bool> SendData<T>(T content) where T : struct
         {
             var data = _crypto.Encrypt(StructUtility.StructToBytes(
                 new Datagram(
                     content: StructUtility.StructToBytes(content),
                     contentType: content.GetContentType())
                 ));
-            TcpSocket.BeginSend(data, 0, data.Length, SocketFlags.None, SendCallback, StateObj);
-        }
-        private void SendCallback(IAsyncResult ar)
-        {
+            
             try
             {
-                int bytesSent = TcpSocket.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+                await TcpSocket.SendAsync(data, SocketFlags.None);
+
+                return true;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
+                return false;
             }
+          
         }
+      
         public void Dispose()
         {
             TcpSocket.Close();

@@ -1,4 +1,4 @@
-﻿using SocketServer.UDP.Entity.ContentTypes;
+﻿using Entity.ContentTypes;
 using System;
 using System.Collections.Generic;
 

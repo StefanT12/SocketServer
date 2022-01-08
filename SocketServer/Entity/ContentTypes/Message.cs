@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketServer.UDP.Entity.ContentTypes
+namespace Entity.ContentTypes
 {
     public struct Message
     {

@@ -1,8 +1,8 @@
-﻿using SocketServer.UDP.Entity.ContentTypes;
+﻿using Entity.ContentTypes;
 using SocketServer.Utility;
 using System.Runtime.InteropServices;
 
-namespace SocketServer.UDP.Entity
+namespace Entity
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct Datagram

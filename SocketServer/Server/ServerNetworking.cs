@@ -1,46 +1,18 @@
-﻿using SocketServer.Cryptography.Entity;
-using SocketServer.UDP.Entity;
-using SocketServer.UDP.Entity.ContentTypes;
+﻿using Entity;
+using SocketServer.Cryptography.Entity;
+using SocketServer.Server.Interfaces;
 using SocketServer.UDP.Interfaces;
 using SocketServer.Utility;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static SocketServer.Server.Interfaces.INetworkServer;
 
 namespace SocketServer.Experiments
 {
-
-
-    public class ClientMeta
-    {
-        public IPEndPoint UdpEndpoint { get; set; }
-        public Socket ConnectedSocket { get; set; }
-        public CryptographicData CryptographicData { get; set; }
-        public SemaphoreSlim TcpLock = new SemaphoreSlim(0, 1);
-    }
-
-    public delegate Task HandleReceivedData(byte[] data);
-
-    public interface INetworkServer:IDisposable
-    {
-        public class ServerNetworkingData
-        {
-            public string HostName { get; set; }
-            public int TcpOpenedPort { get; set; }
-            public int UdpOpenedPort { get; set; }
-        }
-        ServerNetworkingData InitServer(int maxConnections);
-        void WhitelistClient(int tcpPort, int udpPort, string ipAddress, string cryptoSymmetricKey);
-        Task<bool> SendTcp<T>(T content, string ipPort) where T : struct;
-        Task<bool> SendUdp<T>(T content, string ipPort) where T : struct;
-    }
-
     public class ServerNetworking: INetworkServer
     {
         private static Dictionary<string, ClientMeta> _clients = new Dictionary<string, ClientMeta>();
@@ -58,7 +30,7 @@ namespace SocketServer.Experiments
             _handleReceivedData = handleReceivedData;
         }
 
-        public INetworkServer.ServerNetworkingData InitServer(int maxConnections)
+        public ServerNetworkingData InitServer(int maxConnections)
         {
             var address  = Dns.GetHostEntry(Dns.GetHostName())
                         .AddressList
@@ -207,7 +179,6 @@ namespace SocketServer.Experiments
                 return false;
             }
         }
-
         private byte[] _ReadyContentForClient<T>(T content, ClientMeta client) where T : struct
         {
             var datagram = StructUtility.StructToBytes(new Datagram(StructUtility.StructToBytes(content), content.GetContentType()));
@@ -216,11 +187,17 @@ namespace SocketServer.Experiments
 
             return _crypto.Encrypt(datagram);
         }
-
         public void Dispose()
         {
             UdpSocket.Close();
             TcpSocket.Close();
+        }
+        private class ClientMeta
+        {
+            public IPEndPoint UdpEndpoint { get; set; }
+            public Socket ConnectedSocket { get; set; }
+            public CryptographicData CryptographicData { get; set; }
+            public SemaphoreSlim TcpLock = new SemaphoreSlim(0, 1);
         }
     }
 }

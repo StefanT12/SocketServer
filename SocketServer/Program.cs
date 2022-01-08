@@ -1,15 +1,11 @@
-﻿using SocketServer.Cryptography;
+﻿using Entity;
+using Entity.ContentTypes;
+using SocketServer.Cryptography;
 using SocketServer.Experiments;
-using SocketServer.UDP;
-using SocketServer.UDP.Client;
-using SocketServer.UDP.Entity;
-using SocketServer.UDP.Entity.ContentTypes;
-using SocketServer.UDP.Interfaces;
-using SocketServer.UDP.Server;
+using SocketServer.Server.Interfaces;
 using SocketServer.Utility;
 using System;
 using System.Threading.Tasks;
-using UDP;
 
 class Program
 {
@@ -52,7 +48,7 @@ class Program
 
         await client.StartClientAsync(serverData.HostName, serverData.TcpOpenedPort, serverData.UdpOpenedPort);
 
-        client.SendData(new Message
+        await client.SendData(new Message
         {
             Id = 0,
             Msg = "Ready Player1!"

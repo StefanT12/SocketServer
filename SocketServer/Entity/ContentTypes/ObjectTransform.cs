@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketServer.UDP.Entity.ContentTypes
+namespace Entity.ContentTypes
 {
     public struct V3
     {
