@@ -19,7 +19,7 @@ namespace SocketServer.Experiments
     }
     public class ClientNetworking : IDisposable
     {
-        private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(0,1);
+        private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(1,1);
         private const int BufSize = 32 * 2;
         private readonly OnReceiveDataDelegate _onReceiveCallback;
         private readonly ICrypto _crypto;

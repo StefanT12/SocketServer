@@ -12,26 +12,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        //var cd = CryptographyUtility.GenerateData("blabla");
-
-        //IProcessor serverProcessor = new Processor(new Cryptography(), new ServerDataHandler());
-        //serverProcessor.SetEncryption(cd.Encryptor, cd.Decryptor);
-        //Server server = new Server(serverProcessor);
-
-        //IProcessor clientProcessor = new Processor(new Cryptography(), new EngineDataHandler());
-        //clientProcessor.SetEncryption(cd.Encryptor, cd.Decryptor);
-        //Client client = new Client(server.Address, server.OpenedPort, clientProcessor);
-
-        //var content = new ObjectTransform(1, new V3(1,2,3), new Qternion(1,2,3,4));
-        //client.SendAsync(content);
-
-        //Console.ReadKey();
-
-        //server.Dispose();
-
-        //Console.WriteLine("Closed Server \n Press any key to exit");
-        //Console.ReadKey();
-
         const string symKey = "blabla";
 
         ClientNetworking client = new ClientNetworking(OnReceive, new Cryptography()

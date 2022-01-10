@@ -197,7 +197,7 @@ namespace SocketServer.Server
             public IPEndPoint UdpEndpoint { get; set; }
             public Socket ConnectedSocket { get; set; }
             public CryptographicData CryptographicData { get; set; }
-            public SemaphoreSlim TcpLock = new SemaphoreSlim(0, 1);
+            public SemaphoreSlim TcpLock = new SemaphoreSlim(1, 1);
         }
     }
 }
