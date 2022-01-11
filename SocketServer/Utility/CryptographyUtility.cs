@@ -1,4 +1,6 @@
 ﻿using SocketServer.Cryptography.Entity;
+using System;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace SocketServer.Utility
@@ -23,6 +25,31 @@ namespace SocketServer.Utility
             algo.Dispose();
 
             return data;
+        }
+
+        public static ArraySegment<byte> Encrypt(this ICryptoTransform cryptoTransform, ArraySegment<byte> plainBytes)
+        {
+            using (var ms = new MemoryStream())
+            {
+                using (var cs = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write, true))
+                {
+                    cs.Write(plainBytes.Array, 0, plainBytes.Count);
+
+                }
+                return new ArraySegment<byte>(ms.GetBuffer(), 0, (int)ms.Length);
+            }
+        }
+        public static byte[] Decrypt(this ICryptoTransform cryptoTransform, byte[] cypheredBytes)
+        {
+            using (var ms = new MemoryStream())
+            {
+                using (var cs = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write, true))
+                {
+                    cs.Write(cypheredBytes, 0, cypheredBytes.Length);
+
+                }
+                return ms.GetBuffer();
+            }
         }
     }
 }

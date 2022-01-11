@@ -5,8 +5,10 @@ namespace Entity.ContentTypes
 {
     public enum ContentType
     {
+        Undefined = 0,
         ObjectTransform,
-        Undefined,
-        Message
+        Message,
+        Integer,
+        String
     }
 }
