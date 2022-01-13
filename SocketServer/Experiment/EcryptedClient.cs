@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 using SocketServer.Utility;
 namespace SocketServer.Experiment
 {
-    public class EcryptedClient : ISocketClient, ISocketListener
+    public class EcryptedClient : ISocket, ISocketListener
     {
         private IList<ISocketListener> _listeners = new List<ISocketListener>();
 
-        private readonly ISocketClient _socketClient;
+        private readonly ISocket _socketClient;
         private readonly ICryptoTransform _encryptor;
         private readonly ICryptoTransform _decryptor;
-        public EcryptedClient(ISocketClient socketClient, ICryptoTransform encryptor, ICryptoTransform decryptor)
+        public EcryptedClient(ISocket socketClient, ICryptoTransform encryptor, ICryptoTransform decryptor)
         {
             _socketClient = socketClient;
             _socketClient.AddListener(this);
@@ -34,9 +34,9 @@ namespace SocketServer.Experiment
             return _socketClient.SendBytes(_encryptor.Encrypt(bytes));
         }
 
-        public Task StartClientAsync()
+        public Task StartAsync()
         {
-            return _socketClient.StartClientAsync();
+            return _socketClient.StartAsync();
         }
         
         public void ReceivedBytes(byte[] bytes)

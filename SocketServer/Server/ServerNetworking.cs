@@ -36,25 +36,33 @@
 //        Task<bool> SendAsync(ArraySegment<byte> content, Socket toConnectedClient);
 //    }
 
-//    public class ServerUdpSocket: IServerSocket
+//    public class ServerUdpSocket : IServerSocket
 //    {
-//        public ServerUdpSocket(string address) : base(Experiments.SocketClientType.Udp, address)
+//        public ServerUdpSocket(string address) 
 //        {
 
 //        }
 
+//        public int OpenedPort => throw new NotImplementedException();
+
+//        public void Dispose()
+//        {
+//            throw new NotImplementedException();
+//        }
+
 //        public async Task<bool> SendAsync(ArraySegment<byte> content, IPEndPoint to)
 //        {
-//            try
-//            {
-//                int sentBytes = await Socket.SendToAsync(content, SocketFlags.None, to);
+//            return false;
+//            //try
+//            //{
+//            //    int sentBytes = await Socket.SendToAsync(content, SocketFlags.None, to);
 
-//                return sentBytes > 0;
-//            }
-//            catch
-//            {
-//                return false;
-//            }
+//            //    return sentBytes > 0;
+//            //}
+//            //catch
+//            //{
+//            //    return false;
+//            //}
 //        }
 
 //        public Task<bool> SendAsync(ArraySegment<byte> content, Socket toConnectedClient)
@@ -63,21 +71,21 @@
 //        }
 //    }
 
-//    public class ServerTcpSocket : SocketBase, IServerSocket
+//    public class ServerTcpSocket :  IServerSocket
 //    {
 //        private const int _bufSize = 64;
 
 //        private readonly Action<byte[], string> _handleReceivedData;
 //        private readonly Action<string> _handleConnectionClosed;
 //        private readonly Func<Socket, bool> _handleIncomingConnection;
-
+//        private Socket Socket;
 //        private Task _acceptConnections;
 //        public ServerTcpSocket(string address, int maxConnections, Action<byte[], string> handleReceivedData, Action<string> _handleConnectionClosed, Func<Socket, bool> _handleIncomingConnection) : base(SocketClientType.Tcp, address)
 //        {
 //            _handleReceivedData = handleReceivedData;
-          
+
 //            Socket.Listen(maxConnections);
-          
+
 //            _acceptConnections = Task.Run(() => AcceptConnections());
 //        }
 
@@ -452,7 +460,7 @@
 //                return false;
 //            }
 //        }
-//        private ArraySegment<byte>  _ReadyContentForClient<T>(T content, ClientMeta client) where T : struct
+//        private ArraySegment<byte> _ReadyContentForClient<T>(T content, ClientMeta client) where T : struct
 //        {
 //            var datagram = StructUtility.StructToBytes(new Datagram(StructUtility.StructToBytes(content), content.GetContentType()));
 

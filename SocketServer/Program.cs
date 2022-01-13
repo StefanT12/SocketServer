@@ -42,7 +42,7 @@ class Program
 
         var socket = SocketFactory.CreateSocket(SocketFactory.SocketClientType.Tcp);
 
-        ISocketClient socketClient = new SocketClient(socket, Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString(), 0);
+        ISocket socketClient = new SocketClient(socket, Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString(), 0);
 
         var cryptoData = CryptographyUtility.GenerateData("asd");
 

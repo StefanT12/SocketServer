@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace SocketServer.Experiments
 {
-    public class SocketClient : ISocketClient, IDisposable
+    public class SocketClient : ISocket, IDisposable
     {
         private IList<ISocketListener> _listeners = new List<ISocketListener>();
 
@@ -34,7 +34,7 @@ namespace SocketServer.Experiments
             _socket = socket;
         }
         
-        public async Task StartClientAsync()
+        public async Task StartAsync()
         {
             try
             {
@@ -46,7 +46,7 @@ namespace SocketServer.Experiments
             {
                 Console.WriteLine("Could not connect to server...retrying in 10s");
                 await Task.Delay(10000);
-                await StartClientAsync();
+                await StartAsync();
             }
         }
 

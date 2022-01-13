@@ -19,9 +19,12 @@ namespace SocketServer.Experiment
 
         private readonly IDictionary<Type, ListenerMap> _listenerMaps = new Dictionary<Type, ListenerMap>();
 
-        public Dispatcher(IMarshaller marshaller)
+        public Dispatcher(params IMarshaller[] marshallers)
         {
-            marshaller.AddListener(this);
+            foreach(var m in marshallers)
+            {
+                m.AddListener(this);
+            }
         }
 
         public void AddListener<T>(IGenericListener<T> listener)
@@ -36,6 +39,7 @@ namespace SocketServer.Experiment
             }
             _listenerMaps[genericType].Listeners.Add(listener);
         }
+
         public void ReceiveObject(object obj)
         {
             var t = obj.GetType();

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace SocketServer.Experiment.Interfaces
 {
-    public interface ISocketClient 
+    public interface ISocket 
     {
-        Task StartClientAsync();
+        Task StartAsync();
         Task<bool> SendBytes(ArraySegment<byte> bytes);
         void AddListener(ISocketListener listener);
     }

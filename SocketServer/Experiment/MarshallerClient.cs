@@ -13,8 +13,8 @@ namespace SocketServer.Experiment
     public class MarshallerClient : IMarshaller, ISocketListener
     {
         private IList<IObjectListener> _listeners = new List<IObjectListener>();
-        private readonly ISocketClient _socketClient;
-        public MarshallerClient(ISocketClient socketClient)
+        private readonly ISocket _socketClient;
+        public MarshallerClient(ISocket socketClient)
         {
             _socketClient = socketClient;
         }
@@ -39,7 +39,7 @@ namespace SocketServer.Experiment
 
         public Task StartClientAsync()
         {
-            return _socketClient.StartClientAsync();
+            return _socketClient.StartAsync();
         }
 
     }
