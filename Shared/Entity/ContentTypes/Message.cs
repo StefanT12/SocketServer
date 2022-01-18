@@ -10,7 +10,7 @@ namespace Entity.ContentTypes
     public struct Message
     {
         public int Id;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1024)]
         public string Msg;
     }
 }

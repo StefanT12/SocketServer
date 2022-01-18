@@ -17,6 +17,7 @@ namespace SocketServer.Experiment
         public MarshallerClient(ISocket socketClient)
         {
             _socketClient = socketClient;
+            _socketClient.AddListener(this);
         }
         public void AddListener(IObjectListener listener)
         {

@@ -22,14 +22,14 @@ namespace SocketServer.Experiments
 
         private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(1, 1);
         
-        private const int BufSize = 32 * 2;
+        private const int BufSize = 2048;
         private readonly byte[] _buffer = new byte[BufSize];
 
         private readonly Socket _socket;
 
-        public SocketClient(Socket socket, string serverAddress, int serverPort)
+        public SocketClient(Socket socket, string ipPort)
         {
-            _serverEndpoint = new IPEndPoint(IPAddress.Parse(serverAddress), serverPort);
+            _serverEndpoint = IPEndPoint.Parse(ipPort);
 
             _socket = socket;
         }
@@ -42,9 +42,9 @@ namespace SocketServer.Experiments
 
                 _socket.BeginReceive(_buffer, 0, BufSize, 0, ReceiveCallback, _buffer);
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("Could not connect to server...retrying in 10s");
+                Console.WriteLine($"Could not connect to server...retrying in 10s, error: {e}");
                 await Task.Delay(10000);
                 await StartAsync();
             }

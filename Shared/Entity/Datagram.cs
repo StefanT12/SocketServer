@@ -10,12 +10,12 @@ namespace Entity
     [StructLayout(LayoutKind.Sequential)]
     public struct Datagram
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 + 4)]
         public byte[] Content;
         public ContentType ContentType;
         public Datagram(byte[] content, ContentType contentType)
         {
-            Content = new byte[32];
+            Content = new byte[1024 + 4];
             content.CopyTo(Content, 0);
             ContentType = contentType;
         }
