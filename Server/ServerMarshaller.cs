@@ -25,7 +25,7 @@ namespace Server
 
         public void OnBytesReceived(byte[] bytes, string connectionId)
         {
-            var obj = DatagramFactory.CreateObject(bytes);
+            var obj = PacketFactory.CreateObject(bytes);
             foreach (var l in _listeners)
             {
                 l.OnObjectReceived(obj, connectionId);
@@ -50,7 +50,7 @@ namespace Server
 
         public Task<bool> SendObject(object content, string connectionId)
         {
-            var bytes = DatagramFactory.CreateBytes(content);
+            var bytes = PacketFactory.CreateBytes(content);
             return _socket.SendBytes(bytes, connectionId);
         }
 

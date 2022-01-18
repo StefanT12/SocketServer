@@ -1,13 +1,11 @@
-﻿using SocketServer.Experiment.Factory;
-using SocketServer.Experiment.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using SocketServer.Utility;
-namespace SocketServer.Experiment
+using Client.Interfaces;
+using Shared.Utility;
+
+namespace Client
 {
     public class EcryptedClient : ISocket, ISocketListener
     {
@@ -28,7 +26,7 @@ namespace SocketServer.Experiment
         {
             _listeners.Add(listener);
         }
-       
+
         public Task<bool> SendBytes(ArraySegment<byte> bytes)
         {
             return _socketClient.SendBytes(_encryptor.Encrypt(bytes));
@@ -38,11 +36,11 @@ namespace SocketServer.Experiment
         {
             return _socketClient.StartAsync();
         }
-        
+
         public void ReceivedBytes(byte[] bytes)
         {
             var decryptedBytes = _decryptor.Decrypt(bytes);
-            foreach(var listener in _listeners)
+            foreach (var listener in _listeners)
             {
                 listener.ReceivedBytes(decryptedBytes);
             }

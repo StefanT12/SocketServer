@@ -1,17 +1,13 @@
-﻿using Entity;
+﻿using Client;
+using Client.Interfaces;
+using Entity;
 using Entity.ContentTypes;
 using Server;
 using Server.Interfaces;
-using SocketServer.Experiment;
-using SocketServer.Experiment.Factory;
-using SocketServer.Experiment.Interfaces;
-using SocketServer.Experiments;
-using SocketServer.NewStuff;
-using SocketServer.Utility;
+using Shared.Factory;
+using Shared.Utility;
 using System;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using Test;
 
@@ -27,7 +23,7 @@ class Program
 
         var serverSocket = SocketFactory.CreateSocket(IPAddress.Any, SocketFactory.SocketClientType.Tcp);
 
-        ITcpServerSocket tcpServerSocket = new TcpServerSocket(serverSocket, clientRegistry, 100);
+        ITcpServerSocket tcpServerSocket = new TcpServerSocket(serverSocket, clientRegistry, 100, 128);
 
         tcpServerSocket = new EncryptionServerLayer(tcpServerSocket, clientRegistry);
 
@@ -48,7 +44,7 @@ class Program
             Decryptor = cryptoData.Decryptor
         });
 
-        ISocket socketClient = new SocketClient(clientSocket, $"{IPAddress.Loopback}:{((IPEndPoint)(serverSocket.LocalEndPoint)).Port}");
+        ISocket socketClient = new SocketClient(clientSocket, $"{IPAddress.Loopback}:{((IPEndPoint)(serverSocket.LocalEndPoint)).Port}", 128);
 
         socketClient = new EcryptedClient(socketClient, cryptoData.Encryptor, cryptoData.Decryptor);
 

@@ -1,5 +1,5 @@
 ﻿using Entity.ContentTypes;
-using SocketServer.Utility;
+using Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +8,19 @@ using System.Runtime.InteropServices;
 namespace Entity
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Datagram
+    public struct Packet
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 + 4)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public byte[] Content;
         public ContentType ContentType;
-        public Datagram(byte[] content, ContentType contentType)
+        public Packet(byte[] content, ContentType contentType)
         {
             Content = new byte[1024 + 4];
             content.CopyTo(Content, 0);
             ContentType = contentType;
         }
     }
-    public static class DatagramFactory
+    public static class PacketFactory
     {
         private static IDictionary<Type, ContentType> _mappedTypes = new Dictionary<Type, ContentType>
         {
@@ -33,19 +33,19 @@ namespace Entity
         {
             var cType = ContentType.Undefined;
             _mappedTypes.TryGetValue(content.GetType(), out cType);
-            Datagram dgram = new Datagram(StructUtility.StructToBytes(content), cType);
+            Packet dgram = new Packet(StructUtility.StructToBytes(content), cType);
             return StructUtility.StructToBytes(dgram);
         }
 
         private static IDictionary<ContentType, Type> _reversedMappedTypes;
-        static DatagramFactory()
+        static PacketFactory()
         {
             _reversedMappedTypes = new Dictionary<ContentType, Type>(_mappedTypes.Select(x => new KeyValuePair<ContentType, Type>(x.Value, x.Key)));
         }
 
         public static object CreateObject(byte[] bytes)
         {
-            var datagram = StructUtility.BytesToStruct<Datagram>(bytes);
+            var datagram = StructUtility.BytesToStruct<Packet>(bytes);
 
             Type t;
 

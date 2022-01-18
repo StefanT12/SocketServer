@@ -1,18 +1,13 @@
-﻿using Entity;
-using SocketServer.Experiment;
-using SocketServer.Experiment.Factory;
-using SocketServer.Experiment.Interfaces;
-using SocketServer.Utility;
+﻿using Client.Interfaces;
+using Entity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SocketServer.Experiments
+namespace Client
 {
     public class SocketClient : ISocket, IDisposable
     {
@@ -21,28 +16,32 @@ namespace SocketServer.Experiments
         private readonly IPEndPoint _serverEndpoint;
 
         private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(1, 1);
-        
-        private const int BufSize = 2048;
-        private readonly byte[] _buffer = new byte[BufSize];
+
+        private readonly int _bufSize;
+        private readonly byte[] _buffer;
 
         private readonly Socket _socket;
 
-        public SocketClient(Socket socket, string ipPort)
+        public SocketClient(Socket socket, string ipPort, int bufferSize)
         {
+            _bufSize = bufferSize;
+
+            _buffer = new byte[_bufSize];
+
             _serverEndpoint = IPEndPoint.Parse(ipPort);
 
             _socket = socket;
         }
-        
+
         public async Task StartAsync()
         {
             try
             {
                 await _socket.ConnectAsync(_serverEndpoint);
 
-                _socket.BeginReceive(_buffer, 0, BufSize, 0, ReceiveCallback, _buffer);
+                _socket.BeginReceive(_buffer, 0, _bufSize, 0, ReceiveCallback, _buffer);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Could not connect to server...retrying in 10s, error: {e}");
                 await Task.Delay(10000);
@@ -71,7 +70,7 @@ namespace SocketServer.Experiments
                     }
                 }
 
-                _socket.BeginReceive(_buffer, 0, BufSize, 0, ReceiveCallback, _buffer);
+                _socket.BeginReceive(_buffer, 0, _bufSize, 0, ReceiveCallback, _buffer);
             }
             catch (Exception e)
             {
@@ -102,22 +101,5 @@ namespace SocketServer.Experiments
             _socket.Dispose();
             _sendSemaphore.Dispose();
         }
-
-
-
-
-
-        //private static byte[] ObjectToBytes(object obj)
-        //{
-        //    int size = Marshal.SizeOf(obj);
-        //    byte[] strctInBytes = new byte[size];
-        //    IntPtr ptr = Marshal.AllocHGlobal(size);
-
-        //    Marshal.StructureToPtr(obj, ptr, true);
-        //    Marshal.Copy(ptr, strctInBytes, 0, size);
-        //    Marshal.FreeHGlobal(ptr);
-
-        //    return strctInBytes;
-        //}
     }
 }

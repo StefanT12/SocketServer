@@ -1,5 +1,4 @@
-﻿using SocketServer.Experiment.Factory;
-using SocketServer.Experiment.Interfaces;
+﻿using Client.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketServer.Experiment
+namespace Client
 {
     public class Dispatcher : IDispatcher, IObjectListener
     {
@@ -21,7 +20,7 @@ namespace SocketServer.Experiment
 
         public Dispatcher(params IMarshaller[] marshallers)
         {
-            foreach(var m in marshallers)
+            foreach (var m in marshallers)
             {
                 m.AddListener(this);
             }
@@ -44,11 +43,11 @@ namespace SocketServer.Experiment
         {
             var t = obj.GetType();
 
-            ListenerMap listenerMap; 
+            ListenerMap listenerMap;
 
-            if(_listenerMaps.TryGetValue(t, out listenerMap))
+            if (_listenerMaps.TryGetValue(t, out listenerMap))
             {
-                foreach(var listener in listenerMap.Listeners)
+                foreach (var listener in listenerMap.Listeners)
                 {
                     listenerMap.Method.Invoke(listener, new object[] { obj });
                 }

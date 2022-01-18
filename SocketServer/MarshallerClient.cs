@@ -1,14 +1,9 @@
-﻿using Entity;
-using SocketServer.Experiment.Factory;
-using SocketServer.Experiment.Interfaces;
-using System;
+﻿using Client.Interfaces;
+using Entity;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketServer.Experiment
+namespace Client
 {
     public class MarshallerClient : IMarshaller, ISocketListener
     {
@@ -26,8 +21,8 @@ namespace SocketServer.Experiment
 
         public void ReceivedBytes(byte[] bytes)
         {
-            var obj = DatagramFactory.CreateObject(bytes);
-            foreach(var listener in _listeners)
+            var obj = PacketFactory.CreateObject(bytes);
+            foreach (var listener in _listeners)
             {
                 listener.ReceiveObject(obj);
             }
@@ -35,7 +30,7 @@ namespace SocketServer.Experiment
 
         public Task<bool> SendObject(object obj)
         {
-            return _socketClient.SendBytes(DatagramFactory.CreateBytes(obj));
+            return _socketClient.SendBytes(PacketFactory.CreateBytes(obj));
         }
 
         public Task StartClientAsync()

@@ -24,11 +24,12 @@ namespace Server
 
         private Task _acceptConnections = Task.CompletedTask;
         private IList<ITcpBytesListener> _listeners = new List<ITcpBytesListener>();
-        private const int _bufSize = 2048;
+        private readonly int _bufSize;
         private readonly Socket _socket;
         private readonly IClientRegistry _clientRegistry;
-        public TcpServerSocket(Socket socket, IClientRegistry clientRegistry, int maxConnections)
+        public TcpServerSocket(Socket socket, IClientRegistry clientRegistry, int maxConnections, int bufSize)
         {
+            _bufSize = bufSize;
             _clientRegistry = clientRegistry;
             _socket = socket;
             _socket.Listen(maxConnections);

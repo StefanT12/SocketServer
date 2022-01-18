@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SocketServer.Utility
+namespace Shared.Utility
 {
     public static class StructUtility
     {

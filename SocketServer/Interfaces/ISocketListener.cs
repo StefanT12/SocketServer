@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketServer.Experiment.Factory
+namespace Client.Interfaces
 {
     public interface ISocketListener
     {
